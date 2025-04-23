@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div>
+    <h1>
+      {{ person.username }}님의 프로필 페이지
+    </h1>
+    <p>팔로잉 수: {{ person.followings.count }} / 팔로워 수: {{ person.followers.count }} </p>
+    <form action="{% url 'accounts:follow' person.pk %}" method="post">
+      {% csrf_token %}
+      {% if person == user %}
+        <input type="submit" value="Follow" disabled>
+      {% elif user in person.followers.all %}
+        <input type="submit" value="Unfollow">
+      {% else %}
+        <input type="submit" value="Follow">
+      {% endif %}
+    </form>
+    <hr>
+    <h1>팔로잉 목록</h1>
+    {% for following in person.followings.all %}
+    <p><a href="{% url 'accounts:profile' following %}">{{ following }}</a></p>
+    {% endfor %}
+    <hr>
+    <h1>팔로워 목록</h1>
+    {% for follower in person.followers.all %}
+    <p><a href="{% url 'accounts:profile' follower %}">{{ follower }}</a></p>
+    {% endfor %}
+  </div>
+{% endblock content %}

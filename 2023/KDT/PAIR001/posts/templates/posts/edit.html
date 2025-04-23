@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block sidebar%}
+{% endblock sidebar%}
+
+{% block content %}
+  <h1>EDIT</h1>
+
+  <form action="{% url 'posts:update' post.pk %}" method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit">
+  </form>
+
+{% endblock content %}

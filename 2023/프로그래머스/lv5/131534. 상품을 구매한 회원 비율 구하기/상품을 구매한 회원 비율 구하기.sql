@@ -1,0 +1,29 @@
+-- 상품을 구매한 회원 비율 구하기
+
+-- 2021년에 가입한 전체 회원들 중 
+-- 상품을 구매한 회원수
+-- 상품을 구매한 회원의 비율 (소수점 두번째자리에서 반올림)
+-- 년, 월 별로 출력
+-- 년을 기준으로 오름차순, 월을 기준으로 오름차순 정렬
+WITH A AS (
+    SELECT 
+        YEAR(SALES_DATE) AS YEAR,
+        MONTH(SALES_DATE) AS MONTH,
+        COUNT(DISTINCT USER_ID) AS PURCHASED_USERS
+    FROM ONLINE_SALE
+    WHERE USER_ID IN (
+        SELECT USER_ID 
+        FROM USER_INFO
+        WHERE YEAR(JOINED) = 2021
+    )
+    GROUP BY YEAR, MONTH
+), B AS (
+    SELECT COUNT(USER_ID) AS TOTAL_USERS
+    FROM USER_INFO
+    WHERE YEAR(JOINED) = 2021
+)
+SELECT YEAR, MONTH, PURCHASED_USERS, ROUND(PURCHASED_USERS/TOTAL_USERS, 1) AS PURCHASED_RATIO
+FROM A CROSS JOIN B
+ORDER BY YEAR, MONTH
+
+

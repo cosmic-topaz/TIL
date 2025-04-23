@@ -1,0 +1,33 @@
+-- 특정 기간동안 대여 가능한 자동차들의 대여비용 구하기
+WITH T AS (
+    SELECT
+    *,
+    ROUND(DAILY_FEE*(1-DISCOUNT_RATE/100)*30, 0) AS FEE
+FROM 
+    CAR_RENTAL_COMPANY_CAR A
+    LEFT JOIN (
+        SELECT 
+            CAR_TYPE,
+            CAST(REPLACE(DISCOUNT_RATE, "%", "") AS UNSIGNED) AS DISCOUNT_RATE
+        FROM CAR_RENTAL_COMPANY_DISCOUNT_PLAN
+        WHERE DURATION_TYPE LIKE "30%"
+    ) B USING (CAR_TYPE)
+)
+SELECT CAR_ID, CAR_TYPE, FEE
+FROM T
+WHERE
+    CAR_TYPE REGEXP "세단|SUV" -- 자동차 종류가 '세단' 또는 'SUV'
+    AND
+    CAR_ID NOT IN ( -- 2022년 11월 1일부터 2022년 11월 30일까지 대여 가능 
+        SELECT CAR_ID 
+        FROM CAR_RENTAL_COMPANY_RENTAL_HISTORY 
+        WHERE 
+            DATE(START_DATE) BETWEEN "2022-11-01" AND "2022-11-30"
+            OR
+            DATE(END_DATE) BETWEEN "2022-11-01" AND "2022-11-30"
+            OR
+            (DATE(START_DATE) <= "2022-11-01" AND DATE(END_DATE) >= "2022-11-30")
+    )
+    AND
+    FEE BETWEEN 500000 AND 2000000 -- 30일간의 대여 금액이 50만원 이상 200만원 미만
+ORDER BY FEE DESC, CAR_TYPE, CAR_ID DESC
